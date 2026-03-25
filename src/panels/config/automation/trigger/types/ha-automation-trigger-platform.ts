@@ -132,7 +132,8 @@ export class HaPlatformTrigger extends LitElement {
           field.default !== undefined &&
           updatedOptions[key] === undefined &&
           !(
-            key === "behavior" &&
+            field.selector &&
+            "automation_behavior" in field.selector &&
             this.description?.target &&
             !this.trigger?.target
           )
@@ -267,7 +268,7 @@ export class HaPlatformTrigger extends LitElement {
     }
 
     if (
-      fieldName === "behavior" &&
+      "automation_behavior" in selector &&
       this.description?.target &&
       (!this.trigger?.target ||
         (this._resolvedTargetEntityCount !== undefined &&
@@ -466,14 +467,26 @@ export class HaPlatformTrigger extends LitElement {
     this._resolvedTargetEntityCount =
       await this._resolveTargetEntityCount(target);
 
+    const behaviorFieldEntry = Object.entries(
+      this.description?.fields ?? {}
+    ).find(
+      ([, field]) => field.selector && "automation_behavior" in field.selector
+    );
+
+    if (!behaviorFieldEntry) {
+      return;
+    }
+
+    const [behaviorFieldName, behaviorField] = behaviorFieldEntry;
+
     if (
       (!target ||
         (this._resolvedTargetEntityCount !== undefined &&
           this._resolvedTargetEntityCount <= 1)) &&
-      this.trigger.options?.behavior !== undefined
+      this.trigger.options?.[behaviorFieldName] !== undefined
     ) {
       const options = { ...this.trigger.options };
-      delete options.behavior;
+      delete options[behaviorFieldName];
 
       fireEvent(this, "value-changed", {
         value: {
@@ -485,14 +498,17 @@ export class HaPlatformTrigger extends LitElement {
       target &&
       this._resolvedTargetEntityCount !== undefined &&
       this._resolvedTargetEntityCount > 1 &&
-      this.trigger.options?.behavior === undefined
+      this.trigger.options?.[behaviorFieldName] === undefined
     ) {
-      const behaviorDefault = this.description?.fields?.behavior?.default;
+      const behaviorDefault = behaviorField.default;
       if (behaviorDefault !== undefined) {
         fireEvent(this, "value-changed", {
           value: {
             ...this.trigger,
-            options: { ...this.trigger.options, behavior: behaviorDefault },
+            options: {
+              ...this.trigger.options,
+              [behaviorFieldName]: behaviorDefault,
+            },
           },
         });
       }
