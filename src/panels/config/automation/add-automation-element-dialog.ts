@@ -1429,16 +1429,15 @@ class DialogAddAutomationElement
               ></ha-service-icon>
             `,
             key: `${DYNAMIC_PREFIX}${dmn}.${service}`,
-            name: `${domain ? "" : `${domainToName(localize, dmn)}: `}${
-              this.hass.localize(
+            name:
+              localize(
                 `component.${dmn}.services.${service}.name`,
                 this.hass.services[dmn][service].description_placeholders
               ) ||
               services[dmn][service]?.name ||
-              service
-            }`,
+              service,
             description:
-              this.hass.localize(
+              localize(
                 `component.${dmn}.services.${service}.description`,
                 this.hass.services[dmn][service].description_placeholders
               ) ||
