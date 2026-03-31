@@ -36,6 +36,7 @@ import {
   isStrategyDashboard,
   saveConfig,
 } from "../../../../data/lovelace/config/types";
+import { fetchResources } from "../../../../data/lovelace/resource";
 import type {
   LovelaceDashboard,
   LovelaceDashboardCreateParams,
@@ -56,9 +57,11 @@ import {
   showAlertDialog,
   showConfirmationDialog,
 } from "../../../../dialogs/generic/show-dialog-box";
+import type { WindowWithPreloads } from "../../../../data/preloads";
 import "../../../../layouts/hass-loading-screen";
 import "../../../../layouts/hass-tabs-subpage-data-table";
 import type { HomeAssistant, Route } from "../../../../types";
+import { loadLovelaceResources } from "../../../lovelace/common/load-resources";
 import { getLovelaceStrategy } from "../../../lovelace/strategies/get-strategy";
 import { showNewDashboardDialog } from "../../dashboard/show-dialog-new-dashboard";
 import { lovelaceTabs } from "../ha-config-lovelace";
@@ -452,6 +455,16 @@ export class HaConfigLovelaceDashboards extends LitElement {
 
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
+
+    const preloadWindow = window as WindowWithPreloads;
+    if (!preloadWindow.llResProm) {
+      preloadWindow.llResProm = fetchResources(this.hass.connection);
+    }
+
+    preloadWindow.llResProm.then((resources) => {
+      loadLovelaceResources(resources, this.hass);
+    });
+
     this._getDashboards();
   }
 
