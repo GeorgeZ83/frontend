@@ -4376,7 +4376,8 @@
               },
               "search_dashboards": "Search dashboards",
               "heading": {
-                "default": "Dashboards"
+                "default": "Dashboards",
+                "custom": "Custom dashboards"
               }
             },
             "picker": {
